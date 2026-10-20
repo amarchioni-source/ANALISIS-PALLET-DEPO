@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stock por pallets</title>
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f4f4f4;color:#111}
+  .wrap{max-width:900px;margin:0 auto;padding:24px 16px}
+  h1{font-size:22px;margin:0 0 16px}
+  .card{background:#fff;border-radius:8px;padding:16px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+  .err{background:#fde8e8;color:#9b1c1c;padding:10px 14px;border-radius:6px;margin-bottom:16px}
+  button,.btn{background:#111;color:#fff;border:0;border-radius:6px;padding:10px 18px;font-size:15px;cursor:pointer;text-decoration:none;display:inline-block}
+  table.res{width:100%;border-collapse:collapse;font-weight:bold;font-size:20px;table-layout:fixed}
+  table.res td{padding:8px 10px;border:2px solid #fff}
+  td.n,td.p{text-align:center;width:70px}
+  .titulo{background:#000;color:#fff;text-align:center}
+  .mono{background:#c6efce;color:#000}.multi{background:#f2ceef;color:#000}
+  .g{background:#d9d9d9}
+  .c1{color:#2e75b6}.c2{color:#548235}.c3{color:#f00}
+  .nota{font-size:13px;color:#555;margin-top:8px}
+  @media(max-width:640px){table.res{font-size:13px}td.n,td.p{width:42px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Stock por pallets</h1>
+  {% if error %}<div class="err">{{ error }}</div>{% endif %}
+  <div class="card">
+    <form method="post" enctype="multipart/form-data" onsubmit="this.querySelector('button').textContent='Procesando… puede tardar hasta un minuto';this.querySelector('button').disabled=true">
+      <p>Subí el Excel “STOCK POR VENTAS” del día:</p>
+      <input type="file" name="archivo" accept=".xlsx,.xlsm" required>
+      <button type="submit">Calcular</button>
+    </form>
+  </div>
+
+  {% if res %}
+  <p>Archivo: <b>{{ nombre }}</b> &nbsp; <a class="btn" href="/descargar/{{ token }}">Descargar Excel</a></p>
+  {% for clave in ['cajas','kg'] %}
+  {% set b = res[clave] %}
+  <div class="card">
+    <table class="res">
+      <tr><td class="titulo" colspan="6">Pallets en stock &nbsp; {{ b.total }}</td></tr>
+      <tr>
+        <td class="mono">Mono Producto</td><td class="mono n">{{ b.Mono.n }}</td><td class="mono p">{{ '%.0f'|format(b.Mono.pct*100) }}%</td>
+        <td class="multi">Multiproducto</td><td class="multi n">{{ b.Multi.n }}</td><td class="multi p">{{ '%.0f'|format(b.Multi.pct*100) }}%</td>
+      </tr>
+      {% for i in range(3) %}
+      <tr class="c{{ i+1 }}">
+        <td class="g">{{ b.Mono.filas[i].label }}</td><td class="g n">{{ b.Mono.filas[i].n }}</td><td class="g p">{{ '%.0f'|format(b.Mono.filas[i].pct*100) }}%</td>
+        <td class="g">{{ b.Multi.filas[i].label }}</td><td class="g n">{{ b.Multi.filas[i].n }}</td><td class="g p">{{ '%.0f'|format(b.Multi.filas[i].pct*100) }}%</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endfor %}
+  <p class="nota">Pallet = valor único de la columna PALLET. Mono = 1 código de producto; Multi = 2 o más.
+  Se excluyen {{ res.sin_pallet }} cajas sin pallet. Los límites (30/40 cajas, 600/800 kg) están incluidos en “Entre”.</p>
+  {% endif %}
+</div>
+</body>
+</html>
