@@ -3,43 +3,149 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Stock por pallets</title>
+<title>Análisis de pallets – Stock diario | Azul Natural Beef</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f4f4f4;color:#111}
-  .wrap{max-width:900px;margin:0 auto;padding:24px 16px}
-  h1{font-size:22px;margin:0 0 16px}
-  .card{background:#fff;border-radius:8px;padding:16px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-  .err{background:#fde8e8;color:#9b1c1c;padding:10px 14px;border-radius:6px;margin-bottom:16px}
-  button,.btn{background:#111;color:#fff;border:0;border-radius:6px;padding:10px 18px;font-size:15px;cursor:pointer;text-decoration:none;display:inline-block}
-  table.res{width:100%;border-collapse:collapse;font-weight:bold;font-size:20px;table-layout:fixed}
+  :root{
+    --tinta:#10263c; --azul:#1d5a96; --hielo:#e8f0f7; --papel:#fbfcfd; --linea:#c9d6e2; --texto:#1b2a38; --suave:#52657a;
+    --mono:#c6efce; --multi:#f2ceef; --gris:#d9d9d9;
+    --titulo:'Barlow Condensed','Arial Narrow',Arial,sans-serif;
+    --cuerpo:'Source Sans 3',Arial,Helvetica,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--cuerpo);color:var(--texto);background:var(--hielo);line-height:1.5}
+  a{color:var(--azul)}
+  :focus-visible{outline:3px solid #f5a623;outline-offset:2px}
+
+  header{background:var(--tinta);color:#fff;padding:34px 20px 30px;border-bottom:6px solid var(--azul)}
+  .ancho{max-width:1040px;margin:0 auto}
+  header p{margin:0 0 6px;font-size:18px;color:#a9c4de;font-weight:600}
+  header h1{margin:0;font-family:var(--titulo);font-weight:700;font-size:clamp(34px,6vw,58px);line-height:1.02;letter-spacing:.01em}
+  header .sub{margin:12px 0 0;color:#d5e3f0;font-size:17px;max-width:60ch}
+
+  main{padding:28px 20px 48px}
+  .panel{background:var(--papel);border:1px solid var(--linea);border-radius:10px;padding:22px}
+  .superior{display:grid;grid-template-columns:1fr 1.15fr;gap:22px;align-items:start}
+  h2{font-family:var(--titulo);font-size:28px;font-weight:700;margin:0 0 12px;color:var(--tinta);letter-spacing:.01em}
+
+  /* carga de archivo */
+  .zona{display:block;border:2px dashed var(--azul);border-radius:10px;padding:30px 18px;text-align:center;cursor:pointer;background:#f3f8fc;transition:background .15s,border-color .15s}
+  .zona:hover,.zona.sobre{background:#e3eef8;border-color:var(--tinta)}
+  .zona input{position:absolute;opacity:0;width:1px;height:1px}
+  .zona:focus-within{outline:3px solid #f5a623;outline-offset:2px}
+  .zona svg{width:44px;height:44px;stroke:var(--azul)}
+  .zona strong{display:block;font-size:18px;margin-top:6px}
+  .zona span{color:var(--suave);font-size:15px}
+  #nombre{display:block;margin-top:10px;font-weight:700;color:var(--tinta);word-break:break-all}
+  .acciones{margin-top:16px}
+  button,.btn{font-family:var(--cuerpo);background:var(--azul);color:#fff;border:0;border-radius:8px;padding:12px 24px;font-size:17px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
+  button:hover,.btn:hover{background:var(--tinta)}
+  button:disabled{background:#8da3b8;cursor:not-allowed}
+  .aviso{margin-top:14px;font-size:14.5px;color:var(--suave)}
+  .err{background:#fde8e8;border-left:5px solid #b42318;color:#7a1a12;padding:12px 16px;border-radius:6px;margin-bottom:18px;font-weight:600}
+
+  /* instructivo */
+  ol.pasos{list-style:none;margin:0;padding:0;counter-reset:p}
+  ol.pasos li{counter-increment:p;position:relative;padding:0 0 18px 54px}
+  ol.pasos li:not(:last-child)::after{content:"";position:absolute;left:19px;top:40px;bottom:2px;width:2px;background:var(--linea)}
+  ol.pasos li::before{content:counter(p);position:absolute;left:0;top:0;width:40px;height:40px;border-radius:50%;background:var(--tinta);color:#fff;font-family:var(--titulo);font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  ol.pasos b{display:block;font-size:18px;color:var(--tinta)}
+  ol.pasos span{color:var(--suave);font-size:16px}
+  details{margin-top:6px;border-top:1px solid var(--linea);padding-top:12px}
+  summary{cursor:pointer;font-weight:700;color:var(--azul)}
+  details ul{margin:10px 0 0;padding-left:20px;color:var(--suave);font-size:15.5px}
+  details li{margin-bottom:4px}
+
+  /* resultados */
+  .barra{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;margin:28px 0 14px}
+  .barra h2{margin:0}
+  .barra small{display:block;color:var(--suave);font-size:15px;font-family:var(--cuerpo);font-weight:400}
+  .tabla{background:#fff;border:1px solid var(--linea);border-radius:10px;padding:12px;margin-bottom:18px;overflow-x:auto}
+  .tabla h3{margin:2px 4px 10px;font-family:var(--titulo);font-size:22px;color:var(--tinta);font-weight:700}
+  table.res{width:100%;min-width:680px;border-collapse:collapse;font-weight:700;font-size:19px;table-layout:fixed}
   table.res td{padding:8px 10px;border:2px solid #fff}
-  td.n,td.p{text-align:center;width:70px}
+  td.n,td.p{text-align:center;width:62px}
   .titulo{background:#000;color:#fff;text-align:center}
-  .mono{background:#c6efce;color:#000}.multi{background:#f2ceef;color:#000}
-  .g{background:#d9d9d9}
+  .mono{background:var(--mono);color:#000}.multi{background:var(--multi);color:#000}
+  .g{background:var(--gris)}
   .c1{color:#2e75b6}.c2{color:#548235}.c3{color:#f00}
-  .nota{font-size:13px;color:#555;margin-top:8px}
-  @media(max-width:640px){table.res{font-size:13px}td.n,td.p{width:42px}}
+  .nota{font-size:14.5px;color:var(--suave);max-width:90ch}
+
+  /* procesando */
+  #espera{display:none;position:fixed;inset:0;background:rgba(16,38,60,.82);color:#fff;z-index:10;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:20px}
+  #espera.activo{display:flex}
+  .rueda{width:54px;height:54px;border:6px solid #ffffff44;border-top-color:#fff;border-radius:50%;animation:giro 1s linear infinite;margin-bottom:16px}
+  @keyframes giro{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.rueda{animation:none}.zona{transition:none}}
+
+  footer{text-align:center;color:var(--suave);font-size:14px;padding:0 20px 28px}
+
+  @media(max-width:820px){.superior{grid-template-columns:1fr}}
+  @media(max-width:640px){table.res{font-size:16px}td.n,td.p{width:56px}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Stock por pallets</h1>
-  {% if error %}<div class="err">{{ error }}</div>{% endif %}
-  <div class="card">
-    <form method="post" enctype="multipart/form-data" onsubmit="this.querySelector('button').textContent='Procesando… puede tardar hasta un minuto';this.querySelector('button').disabled=true">
-      <p>Subí el Excel “STOCK POR VENTAS” del día:</p>
-      <input type="file" name="archivo" accept=".xlsx,.xlsm" required>
-      <button type="submit">Calcular</button>
-    </form>
+<header>
+  <div class="ancho">
+    <p>Azul Natural Beef</p>
+    <h1>Análisis de pallets – Stock diario</h1>
+    <p class="sub">Subí el informe de stock del día y obtené la distribución de pallets mono y multiproducto, por cajas y por kilos.</p>
+  </div>
+</header>
+
+<main>
+<div class="ancho">
+  {% if error %}<div class="err" role="alert">{{ error }}</div>{% endif %}
+
+  <div class="superior">
+    <section class="panel" aria-labelledby="t-subir">
+      <h2 id="t-subir">Subir el informe</h2>
+      <form id="form" method="post" enctype="multipart/form-data">
+        <label class="zona" id="zona">
+          <input type="file" name="archivo" id="archivo" accept=".xlsx,.xlsm" required>
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+          <strong>Elegí el archivo Excel o arrastralo acá</strong>
+          <span>Formato .xlsx, hasta 60 MB</span>
+          <span id="nombre"></span>
+        </label>
+        <div class="acciones"><button type="submit" id="calcular" disabled>Calcular</button></div>
+        <p class="aviso">El archivo se procesa en el momento y no se guarda en el servidor.</p>
+      </form>
+    </section>
+
+    <section class="panel" aria-labelledby="t-guia">
+      <h2 id="t-guia">Cómo usar la herramienta</h2>
+      <ol class="pasos">
+        <li><b>Descargá el informe del día</b><span>Exportá “STOCK POR VENTAS (con codbar)” del sistema en formato Excel.</span></li>
+        <li><b>Subilo tal cual</b><span>No hace falta borrar filas, columnas ni filtros. La app reconoce sola los encabezados.</span></li>
+        <li><b>Presioná “Calcular”</b><span>Demora entre 10 segundos y 1 minuto. Si la página estaba inactiva, el primer ingreso puede tardar un poco más.</span></li>
+        <li><b>Revisá y descargá</b><span>Aparecen dos cuadros: uno por cajas y otro por kg. Con “Descargar Excel” te llevás el resumen y el detalle por pallet.</span></li>
+      </ol>
+      <details>
+        <summary>Cómo se calcula</summary>
+        <ul>
+          <li>Un pallet es cada código único de la columna PALLET.</li>
+          <li>Mono producto: el pallet tiene un solo código de producto. Multiproducto: tiene dos o más.</li>
+          <li>Rangos por cajas: mayor a 40, entre 30 y 40, menor a 30. Por kg: mayor a 800, entre 600 y 800, menor a 600. Los límites quedan incluidos en “Entre”.</li>
+          <li>Los porcentajes de cada rango son sobre el total de mono o de multiproducto.</li>
+          <li>Se excluyen las cajas que no tienen número de pallet (por ejemplo, las de VRT y despostada).</li>
+        </ul>
+      </details>
+    </section>
   </div>
 
   {% if res %}
-  <p>Archivo: <b>{{ nombre }}</b> &nbsp; <a class="btn" href="/descargar/{{ token }}">Descargar Excel</a></p>
-  {% for clave in ['cajas','kg'] %}
+  <div class="barra">
+    <h2>Resultado<small>Archivo: {{ nombre }}</small></h2>
+    <a class="btn" href="/descargar/{{ token }}">Descargar Excel</a>
+  </div>
+  {% for clave, tit in [('cajas','Pallets según cantidad de cajas'),('kg','Pallets según kilos')] %}
   {% set b = res[clave] %}
-  <div class="card">
-    <table class="res">
+  <div class="tabla">
+    <h3>{{ tit }}</h3>
+    <table class="res"><colgroup><col style="width:28%"><col style="width:11%"><col style="width:11%"><col style="width:28%"><col style="width:11%"><col style="width:11%"></colgroup>
       <tr><td class="titulo" colspan="6">Pallets en stock &nbsp; {{ b.total }}</td></tr>
       <tr>
         <td class="mono">Mono Producto</td><td class="mono n">{{ b.Mono.n }}</td><td class="mono p">{{ '%.0f'|format(b.Mono.pct*100) }}%</td>
@@ -54,9 +160,34 @@
     </table>
   </div>
   {% endfor %}
-  <p class="nota">Pallet = valor único de la columna PALLET. Mono = 1 código de producto; Multi = 2 o más.
-  Se excluyen {{ res.sin_pallet }} cajas sin pallet. Los límites (30/40 cajas, 600/800 kg) están incluidos en “Entre”.</p>
+  <p class="nota">Se excluyeron {{ res.sin_pallet }} cajas sin número de pallet. Los límites (30 y 40 cajas, 600 y 800 kg) están incluidos en “Entre”.</p>
   {% endif %}
 </div>
+</main>
+
+<footer>Azul Natural Beef S.A. – Análisis de pallets, stock diario</footer>
+
+<div id="espera" role="status" aria-live="polite">
+  <div class="rueda"></div>
+  <strong style="font-size:20px">Procesando el stock…</strong>
+  <span>Puede demorar hasta un minuto. No cierres esta ventana.</span>
+</div>
+
+<script>
+  const inp=document.getElementById('archivo'),btn=document.getElementById('calcular'),
+        nom=document.getElementById('nombre'),zona=document.getElementById('zona');
+  function mostrar(){
+    if(inp.files.length){nom.textContent=inp.files[0].name;btn.disabled=false}
+    else{nom.textContent='';btn.disabled=true}
+  }
+  inp.addEventListener('change',mostrar);
+  ['dragenter','dragover'].forEach(e=>zona.addEventListener(e,ev=>{ev.preventDefault();zona.classList.add('sobre')}));
+  ['dragleave','drop'].forEach(e=>zona.addEventListener(e,()=>zona.classList.remove('sobre')));
+  zona.addEventListener('drop',ev=>{ev.preventDefault();if(ev.dataTransfer.files.length){inp.files=ev.dataTransfer.files;mostrar()}});
+  document.getElementById('form').addEventListener('submit',()=>{
+    document.getElementById('espera').classList.add('activo');
+  });
+  window.addEventListener('pageshow',()=>document.getElementById('espera').classList.remove('activo'));
+</script>
 </body>
 </html>
