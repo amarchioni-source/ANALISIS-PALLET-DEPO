@@ -73,6 +73,17 @@
   .c1{color:#2e75b6}.c2{color:#548235}.c3{color:#f00}
   .nota{font-size:14.5px;color:var(--suave);max-width:90ch}
 
+  /* estado listo */
+  .listo{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#e3f6e8;border:2px solid #2e9e55;border-radius:10px;padding:14px 18px;margin-bottom:22px;color:#14532d}
+  .listo svg{width:34px;height:34px;flex:none}
+  .listo div{flex:1;min-width:220px}
+  .listo b{display:block;font-size:19px}
+  .listo a.btn{background:#2e9e55}
+  .listo a.btn:hover{background:#14532d}
+  .zona.ok{border-color:#2e9e55;background:#e3f6e8}
+  .zona.ok svg{stroke:#2e9e55}
+  #resultado{scroll-margin-top:16px}
+
   /* procesando */
   #espera{display:none;position:fixed;inset:0;background:rgba(16,38,60,.82);color:#fff;z-index:10;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:20px}
   #espera.activo{display:flex}
@@ -99,11 +110,19 @@
 <div class="ancho">
   {% if error %}<div class="err" role="alert">{{ error }}</div>{% endif %}
 
+  {% if res %}
+  <div class="listo" role="status">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#2e9e55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>
+    <div><b>Listo: el análisis terminó correctamente</b>Ya podés ver los resultados abajo y descargar el Excel. Para analizar otro stock, subí un nuevo archivo.</div>
+    <a class="btn" href="#resultado">Ver resultados</a>
+  </div>
+  {% endif %}
+
   <div class="superior">
     <section class="panel" aria-labelledby="t-subir">
       <h2 id="t-subir">Subir el informe</h2>
       <form id="form" method="post" enctype="multipart/form-data">
-        <label class="zona" id="zona">
+        <label class="zona{% if res %} ok{% endif %}" id="zona">
           <input type="file" name="archivo" id="archivo" accept=".xlsx,.xlsm" required>
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
           <strong>Elegí el archivo Excel o arrastralo acá</strong>
@@ -137,7 +156,7 @@
   </div>
 
   {% if res %}
-  <div class="barra">
+  <div class="barra" id="resultado">
     <h2>Resultado<small>Archivo: {{ nombre }}</small></h2>
     <a class="btn" href="/descargar/{{ token }}">Descargar Excel</a>
   </div>
@@ -188,6 +207,9 @@
     document.getElementById('espera').classList.add('activo');
   });
   window.addEventListener('pageshow',()=>document.getElementById('espera').classList.remove('activo'));
+  {% if res %}
+  window.addEventListener('load',()=>{document.getElementById('resultado').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})});
+  {% endif %}
 </script>
 </body>
 </html>
